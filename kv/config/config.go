@@ -26,7 +26,7 @@ type Config struct {
 	// When entry count exceed this value, gc will be forced trigger.
 	RaftLogGcCountLimit uint64
 
-	// Interval (ms) to check region whether need to be split or not.
+	// Interval (ms) to check region whether you need to be split or not.
 	SplitRegionCheckTickInterval time.Duration
 	// delay time before deleting a stale peer
 	SchedulerHeartbeatTickInterval      time.Duration
