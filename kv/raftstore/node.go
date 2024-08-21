@@ -28,7 +28,7 @@ type Node struct {
 
 func NewNode(system *Raftstore, cfg *config.Config, schedulerClient scheduler_client.Client) *Node {
 	return &Node{
-		clusterID: schedulerClient.GetClusterID((context.TODO())),
+		clusterID: schedulerClient.GetClusterID(context.TODO()),
 		store: &metapb.Store{
 			Address: cfg.StoreAddr,
 		},
@@ -38,6 +38,7 @@ func NewNode(system *Raftstore, cfg *config.Config, schedulerClient scheduler_cl
 	}
 }
 
+// Start raftstore
 func (n *Node) Start(ctx context.Context, engines *engine_util.Engines, trans Transport, snapMgr *snap.SnapManager) error {
 	storeID, err := n.checkStore(engines)
 	if err != nil {

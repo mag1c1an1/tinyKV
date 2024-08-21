@@ -19,7 +19,8 @@ type peerState struct {
 
 // router routes a message to a peer.
 type router struct {
-	peers       sync.Map // regionID -> peerState
+	peers sync.Map // regionID -> peerState
+	// 生产者
 	peerSender  chan message.Msg
 	storeSender chan<- message.Msg
 }
@@ -63,6 +64,7 @@ func (pr *router) send(regionID uint64, msg message.Msg) error {
 	if p == nil || atomic.LoadUint32(&p.closed) == 1 {
 		return errPeerNotFound
 	}
+	// send msg
 	pr.peerSender <- msg
 	return nil
 }
@@ -88,6 +90,7 @@ func (r *RaftstoreRouter) Send(regionID uint64, msg message.Msg) error {
 func (r *RaftstoreRouter) SendRaftMessage(msg *raft_serverpb.RaftMessage) error {
 	regionID := msg.RegionId
 	if r.router.send(regionID, message.NewPeerMsg(message.MsgTypeRaftMessage, regionID, msg)) != nil {
+		// send failed
 		r.router.sendStore(message.NewPeerMsg(message.MsgTypeStoreRaftMessage, regionID, msg))
 	}
 	return nil

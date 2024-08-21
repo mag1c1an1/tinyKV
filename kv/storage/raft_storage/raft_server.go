@@ -28,8 +28,9 @@ type RaftStorage struct {
 	engines *engine_util.Engines
 	config  *config.Config
 
-	node          *raftstore.Node
-	snapManager   *snap.SnapManager
+	node        *raftstore.Node
+	snapManager *snap.SnapManager
+	// 路由消息
 	raftRouter    *raftstore.RaftstoreRouter
 	raftSystem    *raftstore.Raftstore
 	resolveWorker *worker.Worker
@@ -75,6 +76,7 @@ func NewRaftStorage(conf *config.Config) *RaftStorage {
 	return &RaftStorage{engines: engines, config: conf}
 }
 
+// Write Batch
 func (rs *RaftStorage) Write(ctx *kvrpcpb.Context, batch []storage.Modify) error {
 	var reqs []*raft_cmdpb.Request
 	for _, m := range batch {
@@ -173,19 +175,23 @@ func (rs *RaftStorage) Snapshot(stream tinykvpb.TinyKv_SnapshotServer) error {
 	return err
 }
 
+// Start server
 func (rs *RaftStorage) Start() error {
 	cfg := rs.config
+	// FIXME 有啥用
 	schedulerClient, err := scheduler_client.NewClient(strings.Split(cfg.SchedulerAddr, ","), "")
 	if err != nil {
 		return err
 	}
 	rs.raftRouter, rs.raftSystem = raftstore.CreateRaftstore(cfg)
 
+	// resolve store's address
 	rs.resolveWorker = worker.NewWorker("resolver", &rs.wg)
 	resolveSender := rs.resolveWorker.Sender()
 	resolveRunner := newResolverRunner(schedulerClient)
 	rs.resolveWorker.Start(resolveRunner)
 
+	// TODO
 	rs.snapManager = snap.NewSnapManager(filepath.Join(cfg.DBPath, "snap"))
 	rs.snapWorker = worker.NewWorker("snap-worker", &rs.wg)
 	snapSender := rs.snapWorker.Sender()

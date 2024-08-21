@@ -17,16 +17,16 @@ type RaftLogGCTask struct {
 
 type raftLogGcTaskRes uint64
 
-type raftLogGCTaskHandler struct {
+type RaftLogGCTaskHandler struct {
 	taskResCh chan<- raftLogGcTaskRes
 }
 
-func NewRaftLogGCTaskHandler() *raftLogGCTaskHandler {
-	return &raftLogGCTaskHandler{}
+func NewRaftLogGCTaskHandler() *RaftLogGCTaskHandler {
+	return &RaftLogGCTaskHandler{}
 }
 
 // gcRaftLog does the GC job and returns the count of logs collected.
-func (r *raftLogGCTaskHandler) gcRaftLog(raftDb *badger.DB, regionId, startIdx, endIdx uint64) (uint64, error) {
+func (r *RaftLogGCTaskHandler) gcRaftLog(raftDb *badger.DB, regionId, startIdx, endIdx uint64) (uint64, error) {
 	// Find the raft log idx range needed to be gc.
 	firstIdx := startIdx
 	if firstIdx == 0 {
@@ -66,14 +66,14 @@ func (r *raftLogGCTaskHandler) gcRaftLog(raftDb *badger.DB, regionId, startIdx, 
 	return endIdx - firstIdx, nil
 }
 
-func (r *raftLogGCTaskHandler) reportCollected(collected uint64) {
+func (r *RaftLogGCTaskHandler) reportCollected(collected uint64) {
 	if r.taskResCh == nil {
 		return
 	}
 	r.taskResCh <- raftLogGcTaskRes(collected)
 }
 
-func (r *raftLogGCTaskHandler) Handle(t worker.Task) {
+func (r *RaftLogGCTaskHandler) Handle(t worker.Task) {
 	logGcTask, ok := t.(*RaftLogGCTask)
 	if !ok {
 		log.Errorf("unsupported worker.Task: %+v", t)

@@ -289,8 +289,8 @@ func (r *Raft) sendAppend(to uint64) bool {
 	preLogTerm, err := r.RaftLog.Term(preLogIndex)
 	if err != nil {
 		if errors.Is(err, ErrCompacted) {
-			// TODO
-			panic(err)
+			r.sendSnapshot(to)
+			return true
 		}
 		return false
 	}
@@ -380,9 +380,24 @@ func (r *Raft) sendVoteResp(to uint64, reject bool) {
 }
 
 // install SnapShot RPC
-func (r *Raft) sendSnapshot(tod uint64) {
+func (r *Raft) sendSnapshot(to uint64) {
+	snapshot, err := r.RaftLog.storage.Snapshot()
+	if err != nil {
+		if errors.Is(err, ErrSnapshotTemporarilyUnavailable) {
+			return
+		}
+		panic(err)
+	}
 
-	//TODO
+	r.msgs = append(r.msgs, pb.Message{
+		MsgType:  pb.MessageType_MsgSnapshot,
+		To:       to,
+		From:     r.id,
+		Term:     r.Term,
+		Snapshot: &snapshot,
+	})
+	// FIXME
+	r.Prs[to].Next = snapshot.Metadata.Index + 1
 }
 
 // tick advances the internal logical clock by a single tick.
@@ -725,6 +740,28 @@ func (r *Raft) handleHeartbeatResp(m pb.Message) {
 // handleSnapshot handle Snapshot RPC request
 func (r *Raft) handleSnapshot(m pb.Message) {
 	// Your Code Here (2C).
+	meta := m.Snapshot.Metadata
+	if meta.Index <= r.RaftLog.committed {
+		r.sendAppendResp(m.From, false, 0)
+		return
+	}
+	r.becomeFollower(max(r.Term, meta.Term), m.From)
+
+	// clear log
+	r.RaftLog.entries = make([]pb.Entry, 0)
+	// install snapshot
+	r.RaftLog.applied = meta.Index
+	r.RaftLog.committed = meta.Index
+	r.RaftLog.stabled = meta.Index
+	r.RaftLog.firstIndex = meta.Index + 1
+	r.RaftLog.pendingSnapshot = m.Snapshot
+
+	// update conf
+	r.Prs = make(map[uint64]*Progress)
+	for _, p := range meta.ConfState.Nodes {
+		r.Prs[p] = &Progress{}
+	}
+	r.sendAppendResp(m.From, false, 0)
 }
 
 // addNode add a new node to raft group

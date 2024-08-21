@@ -10,7 +10,7 @@ import (
 type raftWorker struct {
 	pr *router
 
-	// receiver of messages should sent to raft, including:
+	// receiver of messages should send to raft, including:
 	// * raft command from `raftStorage`
 	// * raft inner messages from other peers sent by network
 	raftCh chan message.Msg
@@ -34,7 +34,9 @@ func (rw *raftWorker) run(closeCh <-chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 	var msgs []message.Msg
 	for {
+		// clear msgs
 		msgs = msgs[:0]
+		// block
 		select {
 		case <-closeCh:
 			return

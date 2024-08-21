@@ -113,7 +113,7 @@ func TestGcRaftLog(t *testing.T) {
 	defer engines.Destroy()
 	raftDb := engines.Raft
 	taskResCh := make(chan raftLogGcTaskRes, 1)
-	runner := raftLogGCTaskHandler{taskResCh: taskResCh}
+	runner := RaftLogGCTaskHandler{taskResCh: taskResCh}
 
 	//  generate raft logs
 	regionId := uint64(1)

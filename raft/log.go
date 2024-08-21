@@ -73,7 +73,6 @@ func newLog(storage Storage) *RaftLog {
 		}
 	}
 
-	// todo
 	return &RaftLog{
 		storage:    storage,
 		committed:  hardState.Commit,
@@ -89,6 +88,21 @@ func newLog(storage Storage) *RaftLog {
 // grow unlimitedly in memory
 func (l *RaftLog) maybeCompact() {
 	// Your Code Here (2C).
+	if len(l.entries) < 0 {
+		// FIXME
+		return
+	}
+	newFirstIndex, err := l.storage.FirstIndex()
+	if err != nil {
+		panic(err)
+		return
+	}
+	if newFirstIndex > l.firstIndex {
+		entries := l.entries[newFirstIndex-l.firstIndex:]
+		l.entries = make([]pb.Entry, len(entries))
+		copy(l.entries, entries)
+		l.firstIndex = newFirstIndex
+	}
 }
 
 // allEntries return all the entries not compacted.

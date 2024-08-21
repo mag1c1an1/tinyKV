@@ -13,6 +13,7 @@ import (
 	"github.com/pingcap/tidb/kv"
 )
 
+// is this useful?
 var _ tinykvpb.TinyKvServer = new(Server)
 
 // Server is a TinyKV server, it 'faces outwards', sending and receiving messages from clients such as TinySQL.
@@ -83,7 +84,7 @@ func (server *Server) KvResolveLock(_ context.Context, req *kvrpcpb.ResolveLockR
 	return nil, nil
 }
 
-// SQL push down commands.
+// Coprocessor SQL push down commands.
 func (server *Server) Coprocessor(_ context.Context, req *coppb.Request) (*coppb.Response, error) {
 	resp := new(coppb.Response)
 	reader, err := server.storage.Reader(req.Context)

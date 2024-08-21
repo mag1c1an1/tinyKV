@@ -1,6 +1,7 @@
 package meta
 
 import (
+	"errors"
 	"github.com/Connor1996/badger"
 	"github.com/pingcap-incubator/tinykv/kv/util/engine_util"
 	"github.com/pingcap-incubator/tinykv/proto/pkg/eraftpb"
@@ -41,7 +42,7 @@ func GetRaftEntry(db *badger.DB, regionId, idx uint64) (*eraftpb.Entry, error) {
 }
 
 const (
-	// When we create a region peer, we should initialize its log term/index > 0,
+	// RaftInitLogTerm When we create a region peer, we should initialize its log term/index > 0,
 	// so that we can force the follower peer to sync the snapshot first.
 	RaftInitLogTerm  = 5
 	RaftInitLogIndex = 5
@@ -49,10 +50,10 @@ const (
 
 func InitRaftLocalState(raftEngine *badger.DB, region *metapb.Region) (*rspb.RaftLocalState, error) {
 	raftState, err := GetRaftLocalState(raftEngine, region.Id)
-	if err != nil && err != badger.ErrKeyNotFound {
+	if err != nil && !errors.Is(err, badger.ErrKeyNotFound) {
 		return nil, err
 	}
-	if err == badger.ErrKeyNotFound {
+	if errors.Is(err, badger.ErrKeyNotFound) {
 		raftState = new(rspb.RaftLocalState)
 		raftState.HardState = new(eraftpb.HardState)
 		if len(region.Peers) > 0 {
@@ -72,10 +73,10 @@ func InitRaftLocalState(raftEngine *badger.DB, region *metapb.Region) (*rspb.Raf
 
 func InitApplyState(kvEngine *badger.DB, region *metapb.Region) (*rspb.RaftApplyState, error) {
 	applyState, err := GetApplyState(kvEngine, region.Id)
-	if err != nil && err != badger.ErrKeyNotFound {
+	if err != nil && !errors.Is(err, badger.ErrKeyNotFound) {
 		return nil, err
 	}
-	if err == badger.ErrKeyNotFound {
+	if errors.Is(err, badger.ErrKeyNotFound) {
 		applyState = new(rspb.RaftApplyState)
 		applyState.TruncatedState = new(rspb.RaftTruncatedState)
 		if len(region.Peers) > 0 {
@@ -95,5 +96,9 @@ func WriteRegionState(kvWB *engine_util.WriteBatch, region *metapb.Region, state
 	regionState := new(rspb.RegionLocalState)
 	regionState.State = state
 	regionState.Region = region
-	kvWB.SetMeta(RegionStateKey(region.Id), regionState)
+	err := kvWB.SetMeta(RegionStateKey(region.Id), regionState)
+	if err != nil {
+		panic(err.Error())
+		return
+	}
 }
