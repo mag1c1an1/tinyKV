@@ -37,6 +37,13 @@ t3bb:
     GO111MODULE=on go test -v --count=1 --parallel=1 -p=1 ./kv/test_raftstore -run ^TestSplitConfChangeSnapshotUnreliableRecoverConcurrentPartition3B|| true
 
 
+t4a:
+    GO111MODULE=on go test -v --count=1 --parallel=1 -p=1 ./kv/transaction/... -run 4A
+t4b:
+    GO111MODULE=on go test -v --count=1 --parallel=1 -p=1 ./kv/transaction/... -run 4B
+t4c:
+    GO111MODULE=on go test -v --count=1 --parallel=1 -p=1 ./kv/transaction/... -run 4C
+
 
 t:
     GO111MODULE=on go test -v --count=1 --parallel=1 -p=1 ./kv/test_raftstore -run ^TestConfChangeRecoverManyClients3B|| true
