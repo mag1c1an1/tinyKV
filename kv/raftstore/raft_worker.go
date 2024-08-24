@@ -64,6 +64,7 @@ func (rw *raftWorker) run(closeCh <-chan struct{}, wg *sync.WaitGroup) {
 func (rw *raftWorker) getPeerState(peersMap map[uint64]*peerState, regionID uint64) *peerState {
 	peer, ok := peersMap[regionID]
 	if !ok {
+		// this is slow
 		peer = rw.pr.get(regionID)
 		if peer == nil {
 			return nil

@@ -16,6 +16,7 @@ package raft
 
 import (
 	"errors"
+	"github.com/pingcap-incubator/tinykv/log"
 
 	pb "github.com/pingcap-incubator/tinykv/proto/pkg/eraftpb"
 )
@@ -116,6 +117,7 @@ func (rn *RawNode) Propose(data []byte) error {
 
 // ProposeConfChange proposes a config change.
 func (rn *RawNode) ProposeConfChange(cc pb.ConfChange) error {
+	log.Debug("in ProposeConfChange")
 	data, err := cc.Marshal()
 	if err != nil {
 		return err

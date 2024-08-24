@@ -14,6 +14,7 @@ type Callback struct {
 }
 
 func (cb *Callback) Done(resp *raft_cmdpb.RaftCmdResponse) {
+	// FIXME what is this
 	if cb == nil {
 		return
 	}

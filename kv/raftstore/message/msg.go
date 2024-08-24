@@ -30,7 +30,6 @@ const (
 	MsgTypeRegionApproximateSize MsgType = 6
 	// MsgTypeGcSnap message to trigger gc generated snapshots
 	MsgTypeGcSnap MsgType = 7
-
 	// MsgTypeStoreRaftMessage message wraps a raft message to the peer not existing on the Store.
 	// It is due to region split or add peer conf change
 	MsgTypeStoreRaftMessage MsgType = 101

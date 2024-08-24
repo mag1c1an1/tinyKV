@@ -20,7 +20,7 @@ type peerState struct {
 // router routes a message to a peer.
 type router struct {
 	peers sync.Map // regionID -> peerState
-	// 生产者
+	// producer
 	peerSender  chan message.Msg
 	storeSender chan<- message.Msg
 }
@@ -90,7 +90,8 @@ func (r *RaftstoreRouter) Send(regionID uint64, msg message.Msg) error {
 func (r *RaftstoreRouter) SendRaftMessage(msg *raft_serverpb.RaftMessage) error {
 	regionID := msg.RegionId
 	if r.router.send(regionID, message.NewPeerMsg(message.MsgTypeRaftMessage, regionID, msg)) != nil {
-		// send failed
+		// send peer failed
+		// try by store
 		r.router.sendStore(message.NewPeerMsg(message.MsgTypeStoreRaftMessage, regionID, msg))
 	}
 	return nil

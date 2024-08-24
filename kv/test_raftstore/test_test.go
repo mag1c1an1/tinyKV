@@ -89,7 +89,7 @@ func networkchaos(t *testing.T, cluster *Cluster, ch chan bool, done *int32, unr
 		if partitions {
 			a := make([]int, cluster.count)
 			for i := 0; i < cluster.count; i++ {
-				a[i] = (rand.Int() % 2)
+				a[i] = rand.Int() % 2
 			}
 			pa := make([][]uint64, 2)
 			for i := 0; i < 2; i++ {
@@ -254,14 +254,14 @@ func GenericTest(t *testing.T, part string, nclients int, unreliable bool, crash
 		<-ch_clients
 
 		if crash {
-			log.Warnf("shutdown servers\n")
+			log.Warnf("shutdown servers")
 			for i := 1; i <= nservers; i++ {
 				cluster.StopServer(uint64(i))
 			}
-			// Wait for a while for servers to shutdown, since
+			// Wait for a while for servers to shut down, since
 			// shutdown isn't a real crash and isn't instantaneous
 			time.Sleep(electionTimeout)
-			log.Warnf("restart servers\n")
+			log.Warnf("restart servers")
 			// crash and re-start all
 			for i := 1; i <= nservers; i++ {
 				cluster.StartServer(uint64(i))
@@ -622,7 +622,6 @@ func TestConfChangeRemoveLeader3B(t *testing.T) {
 
 	// now only have (1,1) and (5,5), try to remove (1,1)
 	cluster.MustRemovePeer(1, NewPeer(1, 1))
-
 	// now region 1 only has peer: (5, 5)
 	cluster.MustPut([]byte("k2"), []byte("v2"))
 	MustGetNone(cluster.engines[1], []byte("k2"))

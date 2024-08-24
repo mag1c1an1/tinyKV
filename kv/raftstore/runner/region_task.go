@@ -18,7 +18,7 @@ import (
 	rspb "github.com/pingcap-incubator/tinykv/proto/pkg/raft_serverpb"
 )
 
-// There're some tasks for region worker, such as:
+// There are some tasks for region worker, such as:
 // `RegionTaskGen` which will cause the worker to generate a snapshot according to RegionId,
 // `RegionTaskApply` which will apply a snapshot to the region that id equals RegionId,
 // `RegionTaskDestroy` which will clean up the key range from StartKey to EndKey.

@@ -21,7 +21,7 @@ type regionItem struct {
 	region metapb.Region
 }
 
-// Less returns true if the region start key is less than the other.
+// Less / returns true if the region start key is less than the other.
 func (r *regionItem) Less(other btree.Item) bool {
 	left := r.region.GetStartKey()
 	right := other.(*regionItem).region.GetStartKey()
@@ -106,7 +106,7 @@ func NewMockSchedulerClient(clusterID uint64, baseID uint64) *MockSchedulerClien
 	}
 }
 
-// Implement SchedulerClient interface
+// GetClusterID Implement SchedulerClient interface
 func (m *MockSchedulerClient) GetClusterID(ctx context.Context) uint64 {
 	m.RLock()
 	defer m.RUnlock()
@@ -490,7 +490,7 @@ func (m *MockSchedulerClient) removeRegionLocked(region *metapb.Region) {
 	m.regionsRange.Delete(result)
 }
 
-// Extra API for tests
+// AddPeer Extra API for tests
 func (m *MockSchedulerClient) AddPeer(regionID uint64, peer *metapb.Peer) {
 	m.scheduleOperator(regionID, &Operator{
 		Type: OperatorTypeAddPeer,
@@ -536,7 +536,7 @@ func (m *MockSchedulerClient) scheduleOperator(regionID uint64, op *Operator) {
 	m.operators[regionID] = op
 }
 
-// Utilities
+// MustSamePeers Utilities
 func MustSamePeers(left *metapb.Region, right *metapb.Region) {
 	if len(left.GetPeers()) != len(right.GetPeers()) {
 		panic("unmatched peers length")

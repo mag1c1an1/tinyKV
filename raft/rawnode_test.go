@@ -80,7 +80,7 @@ func TestRawNodeProposeAndConfChange3A(t *testing.T) {
 }
 
 // TestRawNodeProposeAddDuplicateNode ensures that two proposes to add the same node should
-// not affect the later propose to add new node.
+// not affect the later proposal to add new node.
 func TestRawNodeProposeAddDuplicateNode3A(t *testing.T) {
 	s := NewMemoryStorage()
 	rawNode, err := NewRawNode(newTestConfig(1, []uint64{1}, 10, 1, s))

@@ -37,7 +37,6 @@ type PeerStorage struct {
 	raftState *rspb.RaftLocalState
 	// current apply state of the peer
 	applyState *rspb.RaftApplyState
-
 	// current snapshot state
 	snapState snap.SnapState
 	// used to schedule task to region worker
@@ -86,6 +85,7 @@ func (ps *PeerStorage) InitialState() (eraftpb.HardState, eraftpb.ConfState, err
 	return *raftState.HardState, util.ConfStateFromRegion(ps.region), nil
 }
 
+// Entries get from db
 func (ps *PeerStorage) Entries(low, high uint64) ([]eraftpb.Entry, error) {
 	if err := ps.checkRange(low, high); err != nil || low == high {
 		return nil, err
@@ -373,6 +373,13 @@ func (ps *PeerStorage) ApplySnapshot(snapshot *eraftpb.Snapshot, kvWB *engine_ut
 		SnapMeta: snapshot.Metadata,
 		StartKey: snapData.Region.StartKey,
 		EndKey:   snapData.Region.EndKey,
+	}
+	// wait
+	applyRes := <-ch
+
+	if !applyRes {
+		log.Error(err)
+		return nil, errors.New("apply snapshot failed")
 	}
 	result := &ApplySnapResult{
 		PrevRegion: ps.region,

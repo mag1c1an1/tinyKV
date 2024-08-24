@@ -28,7 +28,7 @@ type regionItem struct {
 	region *metapb.Region
 }
 
-// Less returns true if the region start key is less than the other.
+// Less / returns true if the region start key is less than the other.
 func (r *regionItem) Less(other btree.Item) bool {
 	left := r.region.GetStartKey()
 	right := other.(*regionItem).region.GetStartKey()
@@ -147,6 +147,7 @@ func (bs *Raftstore) loadPeers() ([]*peer, error) {
 				return errors.WithStack(err)
 			}
 			region := localState.Region
+			// FIXME
 			if localState.State == rspb.PeerState_Tombstone {
 				tombStoneCount++
 				bs.clearStaleMeta(kvWB, raftWB, localState)
@@ -266,10 +267,14 @@ func (bs *Raftstore) startWorkers(peers []*peer) {
 	workers := bs.workers
 	router := bs.router
 	bs.wg.Add(2) // raftWorker, storeWorker
+	// raft worker get receiver
 	rw := newRaftWorker(ctx, router)
+	// new goroutine
 	go rw.run(bs.closeCh, bs.wg)
 	sw := newStoreWorker(ctx, bs.storeState)
+	// new goroutine
 	go sw.run(bs.closeCh, bs.wg)
+	// send start msg
 	router.sendStore(message.Msg{Type: message.MsgTypeStoreStart, Data: ctx.store})
 	for i := 0; i < len(peers); i++ {
 		regionID := peers[i].regionId
@@ -281,11 +286,13 @@ func (bs *Raftstore) startWorkers(peers []*peer) {
 	workers.regionWorker.Start(runner.NewRegionTaskHandler(engines, ctx.snapMgr))
 	workers.raftLogGCWorker.Start(runner.NewRaftLogGCTaskHandler())
 	workers.schedulerWorker.Start(runner.NewSchedulerTaskHandler(ctx.store.Id, ctx.schedulerClient, NewRaftstoreRouter(router)))
+	// new goroutine
 	go bs.tickDriver.run()
 }
 
 func (bs *Raftstore) shutDown() {
 	close(bs.closeCh)
+	// wait all workers finish
 	bs.wg.Wait()
 	bs.tickDriver.stop()
 	if bs.workers == nil {

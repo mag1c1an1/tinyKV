@@ -54,6 +54,7 @@ func (r *RaftLogGCTaskHandler) gcRaftLog(raftDb *badger.DB, regionId, startIdx, 
 	}
 
 	raftWb := engine_util.WriteBatch{}
+	// gc: delete some key
 	for idx := firstIdx; idx < endIdx; idx += 1 {
 		key := meta.RaftLogKey(regionId, idx)
 		raftWb.DeleteMeta(key)

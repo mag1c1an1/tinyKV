@@ -191,7 +191,7 @@ func (c *Cluster) Request(key []byte, reqs []*raft_cmdpb.Request, timeout time.D
 		req := NewRequest(regionID, region.RegionEpoch, reqs)
 		resp, txn := c.CallCommandOnLeader(&req, timeout)
 		if resp == nil {
-			// it should be timeouted innerly
+			// it should be timeout inner
 			SleepMS(100)
 			continue
 		}
@@ -404,6 +404,7 @@ func (c *Cluster) TransferLeader(regionID uint64, leader *metapb.Peer) {
 	epoch := region.RegionEpoch
 	transferLeader := NewAdminRequest(regionID, epoch, NewTransferLeaderCmd(leader))
 	resp, _ := c.CallCommandOnLeader(transferLeader, 5*time.Second)
+	// Care This
 	if resp.AdminResponse.CmdType != raft_cmdpb.AdminCmdType_TransferLeader {
 		panic("resp.AdminResponse.CmdType != raft_cmdpb.AdminCmdType_TransferLeader")
 	}

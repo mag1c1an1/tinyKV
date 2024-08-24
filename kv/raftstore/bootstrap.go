@@ -62,6 +62,7 @@ func BootstrapStore(engines *engine_util.Engines, clusterID, storeID uint64) err
 	return nil
 }
 
+// 准备启动
 func PrepareBootstrap(engines *engine_util.Engines, storeID, regionID, peerID uint64) (*metapb.Region, error) {
 	region := &metapb.Region{
 		Id:       regionID,
@@ -85,6 +86,8 @@ func PrepareBootstrap(engines *engine_util.Engines, storeID, regionID, peerID ui
 	return region, nil
 }
 
+// 准备启动集群
+// 写入初始状态
 func PrepareBootstrapCluster(engines *engine_util.Engines, region *metapb.Region) error {
 	state := new(rspb.RegionLocalState)
 	state.Region = region

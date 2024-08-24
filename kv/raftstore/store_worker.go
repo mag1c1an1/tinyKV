@@ -149,6 +149,7 @@ func (d *storeWorker) checkMsg(msg *rspb.RaftMessage) (bool, error) {
 	return false, nil
 }
 
+// FIXME
 func (d *storeWorker) onRaftMessage(msg *rspb.RaftMessage) error {
 	regionID := msg.RegionId
 	if err := d.ctx.router.send(regionID, message.Msg{Type: message.MsgTypeRaftMessage, Data: msg}); err == nil {
@@ -286,7 +287,7 @@ func (d *storeWorker) scheduleGCSnap(regionID uint64, keys []snap.SnapKeyWithSen
 	gcSnap := message.Msg{Type: message.MsgTypeGcSnap, Data: &message.MsgGCSnap{Snaps: keys}}
 	if d.ctx.router.send(regionID, gcSnap) != nil {
 		// The snapshot exists because MsgAppend has been rejected. So the
-		// peer must have been exist. But now it's disconnected, so the peer
+		// peer must have been existed. But now it's disconnected, so the peer
 		// has to be destroyed instead of being created.
 		log.Infof("region %d is disconnected, remove snaps %v", regionID, keys)
 		for _, pair := range keys {

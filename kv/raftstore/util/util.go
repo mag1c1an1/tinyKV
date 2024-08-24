@@ -16,7 +16,7 @@ import (
 const RaftInvalidIndex uint64 = 0
 const InvalidID uint64 = 0
 
-// / `is_initial_msg` checks whether the `msg` can be used to initialize a new peer or not.
+// IsInitialMsg / `is_initial_msg` checks whether the `msg` can be used to initialize a new peer or not.
 // There could be two cases:
 //  1. Target peer already exists but has not established communication with leader yet
 //  2. Target peer is added newly due to member change or region split, but it's not
